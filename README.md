@@ -1,5 +1,27 @@
 # OpenWEC
 
+Notes:
+sudo apt update && sudo apt install libclang-dev && cargo build --release
+sudo apt install krb5-user krb5-config
+sudo gedit /etc/krb5.conf
+sudo adduser dcadmin
+sudo usermod -a -G sudo dcadmin
+su dcadmin
+sudo apt install realmd
+sudo hostnamectl set-hostname openwec.democorp.com
+realm join -v -U dcadmin democorp.com
+sudo pam-auth-update
+
+setspn -A HTTP/openwec.democorp.com@democorp.com
+ktpass -princ HTTP/openwec.democorp.com@democorp.com -mapuser owec -crypto ALL -ptype KRB5_NT_PRINCIPAL -pass STRONG_PASSWORD -target dc.democorp.com -out owec.keytab
+
+openwec -c openwec.conf db init
+openwec -c openwec.conf subscriptions new subscription01 query.xml
+mkdir /var/log/openwec
+openwec -c openwec.conf subscriptions edit subscription01 outputs add --format json files /var/log/openwec
+openwec -c openwec.conf subscriptions enable subscription01
+openwecd -c openwec.conf
+
 OpenWEC is a free and open source (GPLv3) implementation of a Windows Event Collector server running on GNU/Linux and written in Rust.
 
 OpenWEC collects Windows event logs from a Linux machine without the need for a third-party local agent running on Windows machines.
