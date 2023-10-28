@@ -1,0 +1,9 @@
+<!-- query.xml -->
+<QueryList>
+    <Query Id="0">
+        <Select Path="Application">*</Select>
+        <Select Path="Security">*</Select>
+        <Select Path="Setup">*</Select>
+        <Select Path="System">*</Select>
+    </Query>
+</QueryList>
