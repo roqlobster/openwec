@@ -18,9 +18,11 @@ ktpass -princ HTTP/openwec.democorp.com@democorp.com -mapuser owec -crypto ALL -
 openwec -c openwec.conf db init
 openwec -c openwec.conf subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
-openwec -c openwec.conf subscriptions edit subscription01 outputs add --format json files /var/log/openwec
+openwec -c openwec.conf subscriptions edit subscription01 outputs add --format json tcp seconion.democorp.com 12000
 openwec -c openwec.conf subscriptions enable subscription01
 openwecd -c openwec.conf
+
+openwec -c openwec.conf stats
 
 OpenWEC is a free and open source (GPLv3) implementation of a Windows Event Collector server running on GNU/Linux and written in Rust.
 
