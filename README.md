@@ -24,6 +24,20 @@ openwecd -c openwec.conf
 
 openwec -c openwec.conf stats
 
+docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
+firewall->hostgroups->manager->add 10.103.0.105 (openwec)
+firewall->portgroups->customportgroup0->tcp->add 10070
+firewall->role->manager->chain->DOCKER-USER->hostgroups->manager->portgroups->customportgroup0
+logstash->defined_pipelines->custom0
+  input {
+    tcp {
+      port => 10070
+      codec => json  
+    }
+  }
+logstash->assigned_pipelines->roles->manager->add custom0
+
+
 OpenWEC is a free and open source (GPLv3) implementation of a Windows Event Collector server running on GNU/Linux and written in Rust.
 
 OpenWEC collects Windows event logs from a Linux machine without the need for a third-party local agent running on Windows machines.
