@@ -5,5 +5,30 @@
         <Select Path="Security">*</Select>
         <Select Path="Setup">*</Select>
         <Select Path="System">*</Select>
+        <Select Path="Microsoft-Windows-Sysmon/Operational">*</Select>
+        <Select Path="Microsoft-Windows-PowerShell/Operational">*</Select>
+        <!-- This rule looks for Applocker EXE or Script events -->
+        <Select Path="Microsoft-Windows-AppLocker/EXE and DLL">*</Select>
+        <Select Path="Microsoft-Windows-AppLocker/MSI and Script">*</Select>
+        <!-- AppLocker packaged (Modern UI) app execution -->
+        <Select Path="Microsoft-Windows-AppLocker/Packaged app-Execution">*</Select>
+        <!-- AppLocker packaged (Modern UI) app installation -->
+        <Select Path="Microsoft-Windows-AppLocker/Packaged app-Deployment">*</Select>
+        <!-- Windows Code Integrity Checks (Kernel-mode Driver and User-mode Protected Media Validation) -->
+        <Select Path="Microsoft-Windows-CodeIntegrity/Operational">*</Select>
+        <Select Path="Microsoft-Windows-DNS-Client/Operational">*</Select>
+        <Select Path="DNS Server">*</Select>
+        <Select Path="Microsoft-Windows-DNSServer/Audit">*</Select>
+        <Select Path="Microsoft-Windows-Windows Defender/Operational">*</Select>
+        <Select Path="Microsoft-Windows-Windows Defender/WHC">*</Select>
+        <Select Path="Microsoft-Windows-Security-Mitigations/KernelMode">*</Select>
+        <Select Path="Microsoft-Windows-Security-Mitigations/KernelMode">*</Select>
+        <Select Path="Microsoft-Windows-Win32k/Operational">*</Select>
+        <Select Path="Microsoft-Windows-Kernel-PnP/Configuration">*</Select>
+        <Select Path="OAlerts">*</Select>
+        <Select Path="Microsoft-Windows-Application-Experience/Program-Inventory">*</Select>
+        <Select Path="Microsoft-Windows-Authentication/AuthenticationPolicyFailures-DomainController">*</Select>
+        <Select Path="Microsoft-Windows-Authentication/ProtectedUserFailures-DomainController">*</Select>
+        <Select Path="Microsoft-Windows-NTLM/Operational">*</Select>
     </Query>
 </QueryList>
