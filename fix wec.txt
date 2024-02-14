@@ -1,0 +1,249 @@
+
+on FWDers:
+    wevtutil gl security
+    grab channelAccess SDDL
+
+on server:
+    CREATE subscriptions with Powershell
+        #Invoke-WebRequest -Uri https://raw.githubusercontent.com/palantir/windows-event-forwarding/master/windows-event-channels/CustomEventChannels.dll -OutFile c:\windows\system32\CustomEventChannels.dll
+        #Invoke-WebRequest -Uri https://raw.githubusercontent.com/palantir/windows-event-forwarding/master/windows-event-channels/CustomEventChannels.man -OutFile c:\windows\system32\CustomEventChannels.man
+        #wevtutil im "c:\windows\system32\CustomEventChannels.man"
+        $xml = wevtutil el | select-string -pattern "WEC"
+        foreach ($subscription in $xml) { wevtutil sl $subscription /ms:4294967296 } #updates configs for all subs starting with WEC*
+        net start wecsvc 
+        Set-Service wecsvc -startuptype automatic
+        
+        #'Autoruns.xml'
+
+        $xmlNames = @(
+            'ADFS.xml'
+            'Account-Lockout.xml'
+            'Account-Management.xml'
+            'Active-Directory.xml'
+            'Application-Crashes.xml'
+            'Applocker.xml'
+            'Authentication.xml'
+            'Bits-Client.xml'
+            'Certificate-Authority.xml'
+            'Code-Integrity.xml'
+            'DNS.xml'
+            'Device-Guard.xml'
+            'Drivers.xml'
+            'Duo-Security.xml'
+            'EMET.xml'
+            'Event-Log-Diagnostics.xml'
+            'Explicit-Credentials.xml'
+            'Exploit-Guard-ASR.xml'
+            'Exploit-Guard-CFA.xml'
+            'Exploit-Guard-EP.xml'
+            'Exploit-Guard-NP.xml'
+            'External-Devices.xml'
+            'Firewall.xml'
+            'Group-Policy-Errors.xml'
+            'Kerberos.xml'
+            'Log-Deletion-Security.xml'
+            'Log-Deletion-System.xml'
+            'MSI-Packages.xml'
+            'Microsoft-Office.xml'
+            'NTLM.xml'
+            'Object-Manipulation.xml'
+            'Operating-System.xml'
+            'Powershell.xml'
+            'Print.xml'
+            'Privilege-Use.xml'
+            'Process-Execution.xml'
+            'Registry.xml'
+            'Services.xml'
+            'Shares.xml'
+            'Smart-Card.xml'
+            'Software-Restriction-Policies.xml'
+            'Sysmon.xml'
+            'System-Time-Change.xml'
+            'Task-Scheduler.xml'
+            'Terminal-Services.xml'
+            'WMI.xml'
+            'Windows-Defender.xml'
+            'Windows-Diagnostics.xml'
+            'Windows-Updates.xml'
+            'Wireless.xml'
+        )
+        Set-Location $env:TEMP
+        $wefDirectory = 'wef-subscriptions'
+        New-Item -ItemType Directory -Name $wefDirectory
+        Set-Location $wefDirectory
+        foreach($xmlName in $xmlNames) {
+            $uri = 'https://raw.githubusercontent.com/palantir/windows-event-forwarding/master/wef-subscriptions/' + $xmlName
+            $outFile = $env:TEMP + '\' + $wefDirectory + '\' + $xmlName
+            Invoke-WebRequest -Uri $uri -OutFile $outFile
+        }
+        #cd c:\Users\vagrant\AppData\Local\Temp\windows-event-forwarding-master\wef-subscriptions
+        cmd /c "for /r %i in (*.xml) do wecutil cs %i"
+        cmd /c "for /r %i in (*.xml) do wecutil ss %~ni /e:true"
+        wecutil qc /q:true        
+        #start win event collector service - 
+        net stop wecsvc
+        #net start wecsvc automatic DELAYED START
+        sc config "wecsvc" start=delayed-auto
+        sc start "wecsvc"
+
+        wecutil cs WEC.xml
+        wecutil WEC /e:true
+
+WEC.XML:
+
+<Subscription xmlns="http://schemas.microsoft.com/2006/03/windows/events/subscription">
+  <SubscriptionId>WEC</SubscriptionId>
+  <SubscriptionType>SourceInitiated</SubscriptionType>
+  <Description>Subscription Description</Description>
+  <Enabled>true</Enabled>
+  <Uri>http://schemas.microsoft.com/wbem/wsman/1/windows/EventLog</Uri>
+  <ConfigurationMode>Custom</ConfigurationMode>
+  <Delivery Mode="Push">
+    <Batching>
+      <MaxItems>1</MaxItems>
+      <MaxLatencyTime>300000</MaxLatencyTime>
+    </Batching>
+    <PushSettings>
+      <Heartbeat Interval="1800000"/>
+    </PushSettings>
+  </Delivery>
+  <Query><![CDATA[
+    <QueryList>
+      <Query Id="0">
+        <Select Path="Application">*</Select>
+        <Select Path="Security">*</Select>
+        <Select Path="Setup">*</Select>
+        <Select Path="System">*</Select>
+        <Select Path="Microsoft-Windows-Sysmon/Operational">*</Select>
+        <Select Path="Microsoft-Windows-PowerShell/Operational">*</Select>
+      </Query>
+    </QueryList>]]></Query>
+  <ReadExistingEvents>true</ReadExistingEvents>
+  <TransportName>http</TransportName>
+  <ContentFormat>RenderedText</ContentFormat>
+  <Locale Language="en-US"/>
+  <LogFile>ForwardedEvents</LogFile>
+  <AllowedSourceNonDomainComputers/>
+  <AllowedSourceDomainComputers>O:NSG:NSD:(A;;GA;;;DC)(A;;GA;;;NS)(A;;GA;;;DD)</AllowedSourceDomainComputers>
+</Subscription>
+
+
+
+new GPO:
+    enable-PSRemoting
+    Computer Configuration → 
+        Policies → 
+        Administrative Templates → 
+        Windows Components → 
+        Event Forwarding → 
+        Configure target subscription manager
+            Set the value for the target subscription manager to the WinRM endpoint on the collector
+            Server=http://<FQDN of the collector>:5985/wsman/SubscriptionManager/WEC,Refresh=60
+    DC_Audit_Policy
+    Server_Audit_Policy
+    Workstations_Audit_Policy
+    Powershell_logging and transcription
+    Custom Event Channel Permissions
+    Windows Event Forwarding Server
+    Autorun monitoring? https://github.com/realparisi/WMI_Monitor/blob/master/WMIMonitor.ps1
+    T1098
+    
+
+    Computer Configuration → 
+        Policies → 
+        Administrative Templates → 
+        Windows Components → 
+        Event Log Service → 
+        Security → 
+        Configure log access
+            O:BAG:SYD...
+
+compmgmt.msc
+local sec pol
+wecutil qc
+gpupdate /force
+
+
+Set the following setting Computer Configuration -> Policies -> Administrative Templates -> Windows Components -> Windows PowerShell to the following:
+
+Turn on PowerShell Transcription: Enabled
+Transcript output directory: \\SERVERNAME\pslogs
+Include invocation headers: Enabled
+
+
+###https://github.com/palantir/windows-event-forwarding/tree/master/group-policy-objects
+Set the following setting Computer Configuration -> Administrative Templates -> Windows Components -> Windows PowerShell to the following:
+
+Turn on Module Logging: Enabled
+Module Names: *
+Turn on Powershell Script Block Logging: Enabled
+Log script block invocation start / stop events: Disabled
+
+
+gpo-comp-policies-windows settings-sec settings-adv audit-audit pol-obj access-audit Filtering Conn S/F
+gpo-comp-policies-windows settings-sec settings-adv audit-audit pol-obj access-audit Filtering Packet Drop S/F
+
+
+{0CCE9226-69AE-11D9-BED3-505054503030}
+Identifies the Filtering Platform Connection audit subcategory.
+This subcategory audits connections that are allowed or blocked by WFP.
+5031
+5150
+5151
+5154
+5155
+5166
+5157
+5158
+5159
+
+{0CCE9225-69AE-11D9-BED3-505054503030}
+Identifies the Filtering Platform Packet Drop audit subcategory.
+This subcategory audits packets that are dropped by Windows Filtering Platform (WFP).
+5152
+5153
+
+
+
+WMI Autorun monitoring? https://github.com/realparisi/WMI_Monitor/blob/master/WMIMonitor.ps1
+
+<Subscription xmlns="http://schemas.microsoft.com/2006/03/windows/events/subscription">
+  <SubscriptionId>WMI</SubscriptionId>
+  <SubscriptionType>SourceInitiated</SubscriptionType>
+  <Description>Window Management Instrumentation events.</Description>
+  <Enabled>true</Enabled>
+  <Uri>http://schemas.microsoft.com/wbem/wsman/1/windows/EventLog</Uri>
+  <ConfigurationMode>Custom</ConfigurationMode>
+  <Delivery Mode="Push">
+    <Batching>
+      <MaxItems>5</MaxItems>
+      <MaxLatencyTime>300000</MaxLatencyTime>
+    </Batching>
+    <PushSettings>
+      <Heartbeat Interval="1800000"/>
+    </PushSettings>
+  </Delivery>
+  <Query><![CDATA[
+    <QueryList>
+      <!-- Inspired by Microsoft Documentation and/or IADGOV -->
+      <Query Id="0" Path="Microsoft-Windows-WMI-Activity/Operational">
+        <Select Path="Microsoft-Windows-WMI-Activity/Operational">*</Select>
+      </Query>
+      <Query Id="1" Path="Microsoft-Windows-TPM-WMI">
+        <!-- 513: TPM Owner Authorization information was backed up successfully to Active Directory Domain Services. -->
+        <!-- 514: Failed to backup TPM Owner Authorization information to Active Directory Domain Services. -->
+        <Select Path="Microsoft-Windows-TPM-WMI">*</Select>
+     </Query>
+     <Query Id="2" Path="Application">
+        <!-- WMI Command -->
+        <Select Path="Application">*[System[Provider[@Name='WSH'] and (EventID=8)]]</Select>
+      </Query>
+    </QueryList>]]></Query>
+  <ReadExistingEvents>true</ReadExistingEvents>
+  <TransportName>http</TransportName>
+  <ContentFormat>RenderedText</ContentFormat>
+  <Locale Language="en-US"/>
+  <LogFile>WEC-WMI</LogFile>
+  <AllowedSourceNonDomainComputers/>
+  <AllowedSourceDomainComputers>O:NSG:NSD:(A;;GA;;;DC)(A;;GA;;;NS)(A;;GA;;;DD)</AllowedSourceDomainComputers>
+</Subscription>
