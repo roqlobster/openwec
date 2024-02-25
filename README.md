@@ -18,7 +18,7 @@ cargo build --release
 nano openwec.conf.toml #copy from source
 nano query.xml #copy from source
 
-#run these two lines on the DC
+#run these lines on the DC
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
 #create an AD user named owec
 ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
