@@ -3,7 +3,7 @@
 Notes:
 ```
 sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential && cargo build --release
-sudo apt install krb5-user krb5-config
+sudo apt install krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
 sudo gedit /etc/krb5.conf
 sudo adduser dcadmin
 sudo usermod -a -G sudo dcadmin
