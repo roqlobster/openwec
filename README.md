@@ -42,7 +42,7 @@ type = "Kerberos"
 service_principal_name = "http/openwec.democorp.com@DEMOCORP.COM"
 ##### EOF #####
 
-mkdir /var/db/openwec
+sudo mkdir /var/db/openwec -p
 openwec -c openwec.conf db init
 openwec -c openwec.conf subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
