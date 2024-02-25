@@ -33,8 +33,7 @@ nc -l 10700 > ./logdump.txt &
 ./target/release/openwec -c openwec.conf.toml subscriptions enable subscription01
 ./target/release/openwecd -c openwec.conf.toml &
 tail -f logdump.txt
-
-openwec -c openwec.conf stats
+./target/release/openwec -c openwec.conf.toml stats
 ```
 
 1. docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
