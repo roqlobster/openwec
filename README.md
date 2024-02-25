@@ -1,7 +1,8 @@
 # OpenWEC
 
 Notes:
-sudo apt update && sudo apt install libclang-dev && cargo build --release
+```
+sudo apt update && sudo apt install libclang-dev cargo && cargo build --release
 sudo apt install krb5-user krb5-config
 sudo gedit /etc/krb5.conf
 sudo adduser dcadmin
@@ -23,20 +24,23 @@ openwec -c openwec.conf subscriptions enable subscription01
 openwecd -c openwec.conf
 
 openwec -c openwec.conf stats
+```
 
-docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
-firewall->hostgroups->manager->add 10.103.0.105 (openwec)  (apply to node: manager)
-firewall->portgroups->customportgroup0->tcp->add 10070  (apply to node: manager)
-firewall->role->manager->chain->DOCKER-USER->hostgroups->manager->portgroups->customportgroup0  (apply to node: manager)
-firewall->role->manager->chain->INPUT->hostgroups->customhostgroup->portgroups->customportgroup0  (apply to node: manager)
-logstash->defined_pipelines->custom0
+1. docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
+1. firewall->hostgroups->manager->add 10.103.0.105 (openwec)  (apply to node: manager)
+1. firewall->portgroups->customportgroup0->tcp->add 10070  (apply to node: manager)
+1. firewall->role->manager->chain->DOCKER-USER->hostgroups->manager->portgroups->customportgroup0  (apply to node: manager)
+1. firewall->role->manager->chain->INPUT->hostgroups->customhostgroup->portgroups->customportgroup0  (apply to node: manager)
+1. logstash->defined_pipelines->custom0
+```
   input {
     tcp {
       port => 10070
       codec => json_lines
     }
   }
-logstash->assigned_pipelines->roles->manager->add custom0
+```
+1. logstash->assigned_pipelines->roles->manager->add custom0
 
 
 OpenWEC is a free and open source (GPLv3) implementation of a Windows Event Collector server running on GNU/Linux and written in Rust.
