@@ -24,26 +24,7 @@ setspn -A HTTP/openwec.democorp.com@democorp.com openwec
 ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
 scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
 
-
-# /etc/openwec.conf.toml
-[server]
-keytab = "owec.keytab"
-
-[logging]
-
-[database]
-type = "SQLite"
-path = "db.sqlite"
-
-[[collectors]]
-hostname = "openwec.democorp.com"
-listen_address = "0.0.0.0"
-
-[collectors.authentication]
-type = "Kerberos"
-service_principal_name = "http/openwec.democorp.com@DEMOCORP.COM"
-##### EOF #####
-
+# back on openwec in /home/dcadmin/openwec dir:
 ./target/release/openwec -c openwec.conf.toml db init
 ./target/release/openwec -c openwec.conf.toml subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
