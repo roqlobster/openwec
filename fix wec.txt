@@ -161,13 +161,14 @@ new GPO:
         Event Log Service → 
         Security → 
         Configure log access
-            O:BAG:SYD... # this wasn't needed last time
+            O:BAG:SYD:(A;;0xf0005;;;SY)(A;;0x5;;;BA)(A;;0x1;;;S-1-5-32-573) # this was required in step 1 
 
 compmgmt.msc
 local sec pol
 wecutil qc
 gpupdate /force
 
+https://github.com/elastic/beats/issues/23910 - how to ingest raw XML
 
 Set the following setting Computer Configuration -> Policies -> Administrative Templates -> Windows Components -> Windows PowerShell to the following:
 
