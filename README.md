@@ -10,7 +10,7 @@ sudo usermod -a -G sudo dcadmin
 su dcadmin
 sudo apt install realmd
 sudo hostnamectl set-hostname openwec.democorp.com
-realm join -v -U dcadmin democorp.com
+sudo realm join -v -U dcadmin democorp.com
 sudo pam-auth-update
 
 setspn -A HTTP/openwec.democorp.com@democorp.com
