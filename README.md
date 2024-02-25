@@ -44,12 +44,12 @@ type = "Kerberos"
 service_principal_name = "http/openwec.democorp.com@DEMOCORP.COM"
 ##### EOF #####
 
-openwec -c openwec.conf db init
-openwec -c openwec.conf subscriptions new subscription01 query.xml
+./target/release/openwec -c openwec.conf.toml db init
+./target/release/openwec -c openwec.conf.toml subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
-openwec -c openwec.conf subscriptions edit subscription01 outputs add --format json tcp seconion.democorp.com 12000
-openwec -c openwec.conf subscriptions enable subscription01
-openwecd -c openwec.conf
+./target/release/openwec -c openwec.conf.toml subscriptions edit subscription01 outputs add --format json tcp seconion.democorp.com 12000
+./target/release/openwec -c openwec.conf.toml subscriptions enable subscription01
+./target/release/openwecd -c openwec.conf.toml
 
 openwec -c openwec.conf stats
 ```
