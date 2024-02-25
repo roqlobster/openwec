@@ -29,7 +29,7 @@ scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
 ./target/release/openwec -c openwec.conf.toml subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
 nc -l 12000 > ./logdump.txt &
-./target/release/openwec -c openwec.conf.toml subscriptions edit subscription01 outputs add --format json tcp seconion.democorp.com 12000
+./target/release/openwec -c openwec.conf.toml subscriptions edit subscription01 outputs add --format json tcp 127.0.0.1 12000
 ./target/release/openwec -c openwec.conf.toml subscriptions enable subscription01
 ./target/release/openwecd -c openwec.conf.toml &
 tail -f logdump.txt
