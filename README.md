@@ -2,38 +2,38 @@
 
 Notes:
 ```
-sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential && cargo build --release
-sudo apt install krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
-sudo nano /etc/krb5.conf
 sudo adduser dcadmin
 sudo usermod -a -G sudo dcadmin
 su dcadmin
+sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential && 
+sudo apt install krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
+sudo nano /etc/krb5.conf
 sudo apt install realmd
 sudo hostnamectl set-hostname openwec.democorp.com
 sudo realm join -v -U dcadmin democorp.com
 sudo pam-auth-update
+git clone https://github.com/cea-sec/openwec
+cd openwec
+cargo build --release
+nano openwec.conf.toml #copy from source
+nano query.xml #copy from source
 
 #run these two lines on the DC
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
 #create an AD user named owec
 ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
-scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin
-
-# on openwec.democorp.com:
-sudo cp /home/dcadmin/owec.keytab /etc/owec.keytab
-sudo nano /etc/openwec.conf.toml
+scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
 
 
 # /etc/openwec.conf.toml
 [server]
-keytab = "/etc/owec.keytab"
+keytab = "owec.keytab"
 
 [logging]
 
 [database]
 type = "SQLite"
-# You need to create /var/db/openwec yourself
-path = "/var/db/openwec/db.sqlite"
+path = "db.sqlite"
 
 [[collectors]]
 hostname = "openwec.democorp.com"
@@ -44,8 +44,6 @@ type = "Kerberos"
 service_principal_name = "http/openwec.democorp.com@DEMOCORP.COM"
 ##### EOF #####
 
-sudo mkdir /var/db/openwec -p
-sudo chown dcadmin /var/db/openwec/
 openwec -c openwec.conf db init
 openwec -c openwec.conf subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
