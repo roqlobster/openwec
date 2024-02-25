@@ -131,6 +131,11 @@ WEC.XML:
 
 new GPO:
     enable-PSRemoting
+        1. In the Group Policy Management Editor, navigate to "Computer Configuration" -> "Policies" -> "Administrative Templates" -> "Windows Components" -> "Windows Remote Management (WinRM)" -> "WinRM Service".
+        1. Enable the "Allow Remote Server management through WinRM" policy. In the policy properties, set the "IPv4 filter" to "*" for all IP addresses, or set specific IP addresses as needed.
+        1. Navigate to "Computer Configuration" -> "Policies" -> "Windows Settings" -> "Security Settings" -> "Windows Firewall with Advanced Security" -> "Windows Firewall with Advanced Security - LDAP://..." -> "Inbound Rules".
+        1. Right-click "Inbound Rules" and select "New Rule...". Create a new rule to allow inbound traffic on TCP port 5985 (the default port for WinRM). Make sure the rule applies to the domain profile.
+        
     Computer Configuration → 
         Policies → 
         Administrative Templates → 
@@ -156,7 +161,7 @@ new GPO:
         Event Log Service → 
         Security → 
         Configure log access
-            O:BAG:SYD...
+            O:BAG:SYD... # this wasn't needed last time
 
 compmgmt.msc
 local sec pol
