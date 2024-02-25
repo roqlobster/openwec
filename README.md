@@ -15,7 +15,8 @@ sudo pam-auth-update
 
 #run these two lines on the DC
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
-ktpass -princ HTTP/openwec.democorp.com@democorp.com -mapuser owec -crypto ALL -ptype KRB5_NT_PRINCIPAL -pass STRONG_PASSWORD -target dc.democorp.com -out owec.keytab
+#create an AD user named owec
+ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
 
 openwec -c openwec.conf db init
 openwec -c openwec.conf subscriptions new subscription01 query.xml
