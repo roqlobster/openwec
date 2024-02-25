@@ -4,7 +4,7 @@ Notes:
 ```
 sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential && cargo build --release
 sudo apt install krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
-sudo gedit /etc/krb5.conf
+sudo nano /etc/krb5.conf
 sudo adduser dcadmin
 sudo usermod -a -G sudo dcadmin
 su dcadmin
@@ -17,7 +17,32 @@ sudo pam-auth-update
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
 #create an AD user named owec
 ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
+scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin
 
+# on openwec.democorp.com:
+sudo cp /home/dcadmin/owec.keytab /etc/owec.keytab
+sudo nano /etc/openwec.conf.toml
+
+
+# /etc/openwec.conf.toml
+[server]
+keytab = "/etc/owec.keytab"
+
+[database]
+type = "SQLite"
+# You need to create /var/db/openwec yourself
+path = "/var/db/openwec/db.sqlite"
+
+[[collectors]]
+hostname = "openwec.democorp.com"
+listen_address = "0.0.0.0"
+
+[collectors.authentication]
+type = "Kerberos"
+service_principal_name = "http/openwec.democorp.com@DEMOCORP.COM"
+##### EOF #####
+
+mkdir /var/db/openwec
 openwec -c openwec.conf db init
 openwec -c openwec.conf subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
