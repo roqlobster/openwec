@@ -13,6 +13,7 @@ sudo hostnamectl set-hostname openwec.democorp.com
 sudo realm join -v -U dcadmin democorp.com
 sudo pam-auth-update
 
+#run these two lines on the DC
 setspn -A HTTP/openwec.democorp.com@democorp.com
 ktpass -princ HTTP/openwec.democorp.com@democorp.com -mapuser owec -crypto ALL -ptype KRB5_NT_PRINCIPAL -pass STRONG_PASSWORD -target dc.democorp.com -out owec.keytab
 
