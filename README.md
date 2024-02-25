@@ -28,6 +28,8 @@ sudo nano /etc/openwec.conf.toml
 [server]
 keytab = "/etc/owec.keytab"
 
+[logging]
+
 [database]
 type = "SQLite"
 # You need to create /var/db/openwec yourself
@@ -43,6 +45,7 @@ service_principal_name = "http/openwec.democorp.com@DEMOCORP.COM"
 ##### EOF #####
 
 sudo mkdir /var/db/openwec -p
+sudo chown dcadmin /var/db/openwec/
 openwec -c openwec.conf db init
 openwec -c openwec.conf subscriptions new subscription01 query.xml
 mkdir /var/log/openwec
