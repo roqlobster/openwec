@@ -2,7 +2,7 @@
 
 Notes:
 ```
-sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev && cargo build --release
+sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential && cargo build --release
 sudo apt install krb5-user krb5-config
 sudo gedit /etc/krb5.conf
 sudo adduser dcadmin
