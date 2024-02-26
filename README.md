@@ -65,12 +65,11 @@ scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
 git clone https://github.com/cea-sec/openwec
 cd openwec
 cargo build --release
-nano openwec.conf.toml #copy from source
+mkdir /var/log/openwec # check if this is needed
 nano query.xml #copy from source
+nano openwec.conf.toml #copy from source
 ./target/release/openwec -c openwec.conf.toml db init
 ./target/release/openwec -c openwec.conf.toml subscriptions new openwec_sub query.xml
-mkdir /var/log/openwec # check if this is needed
-
 ./target/release/openwec -c openwec.conf.toml subscriptions edit openwec_sub outputs add --format raw tcp 127.0.0.1 9000
 ./target/release/openwec -c openwec.conf.toml subscriptions enable openwec_sub
 ./target/release/openwecd -c openwec.conf.toml # wait 60 seconds for connection errors to appear for 127.0.0.1:9000
