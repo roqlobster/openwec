@@ -2,6 +2,27 @@
 
 Notes:
 ```
+### ON LOGSTASH SERVER ###
+### Look into containers instead:
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic-keyring.gpg
+sudo apt-get install apt-transport-https
+echo "deb [signed-by=/usr/share/keyrings/elastic-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
+sudo apt-get update && sudo apt-get install logstash
+nano pipeline.conf
+### SOF ###
+input {
+  beats {
+    port => 5044
+  }
+}
+
+output {
+  stdout { codec => rubydebug }
+}
+### EOF ###
+sudo /usr/share/logstash/bin/logstash -f pipeline.conf
+
+### OPEN NEW SSH TO OPENWEC ###
 sudo adduser dcadmin
 sudo usermod -a -G sudo dcadmin
 su dcadmin
@@ -12,28 +33,47 @@ sudo apt install realmd
 sudo hostnamectl set-hostname openwec.democorp.com
 sudo realm join -v -U dcadmin democorp.com
 sudo pam-auth-update
+nano filebeat.yml
+###SOF###
+filebeat.inputs:
+- type: tcp
+  host: "localhost:9000"
+output.logstash:
+  # The Logstash hosts
+  hosts: ["logstash.democorp.com:5044"]
+processors:
+  - rename:
+      fields:
+        - from: message
+          to: event.original
+#      ignore_missing: true
+  - decode_xml_wineventlog:
+      field: event.original
+      target_field: winlog
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+###EOF###
+filebeat -e -c /etc/filebeat/filebeat.yml -d "publish"
+
+### Run these commands on the DC ###
+setspn -A HTTP/openwec.democorp.com@democorp.com openwec
+# create an AD user named owec - find powershell to create this automatically
+ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
+scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
+
+### OPEN NEW SSH TO OPENWEC ###
 git clone https://github.com/cea-sec/openwec
 cd openwec
 cargo build --release
 nano openwec.conf.toml #copy from source
 nano query.xml #copy from source
-
-#run these lines on the DC
-setspn -A HTTP/openwec.democorp.com@democorp.com openwec
-#create an AD user named owec
-ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
-scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
-
-# back on openwec in /home/dcadmin/openwec dir:
 ./target/release/openwec -c openwec.conf.toml db init
-./target/release/openwec -c openwec.conf.toml subscriptions new subscription01 query.xml
-mkdir /var/log/openwec
-nc -l 10700 > ./logdump.txt &
-./target/release/openwec -c openwec.conf.toml subscriptions edit subscription01 outputs add --format json tcp 127.0.0.1 10700
-./target/release/openwec -c openwec.conf.toml subscriptions enable subscription01
-./target/release/openwecd -c openwec.conf.toml &
-./target/release/openwec -c openwec.conf.toml stats
-tail -f logdump.txt
+./target/release/openwec -c openwec.conf.toml subscriptions new openwec_sub query.xml
+mkdir /var/log/openwec # check if this is needed
+
+./target/release/openwec -c openwec.conf.toml subscriptions edit openwec_sub outputs add --format raw tcp 127.0.0.1 9000
+./target/release/openwec -c openwec.conf.toml subscriptions enable openwec_sub
+./target/release/openwecd -c openwec.conf.toml # wait 60 seconds for connection errors to appear for 127.0.0.1:9000
 ```
 
 1. docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
