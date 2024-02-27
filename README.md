@@ -15,7 +15,6 @@ input {
     port => 5044
   }
 }
-
 output {
   stdout { codec => rubydebug }
 }
@@ -33,13 +32,19 @@ sudo apt install realmd
 sudo hostnamectl set-hostname openwec.democorp.com
 sudo realm join -v -U dcadmin democorp.com
 sudo pam-auth-update
-nano filebeat.yml
+sudo nano /etc/filebeat/filebeat.yml
 ###SOF###
 filebeat.inputs:
-- type: tcp
-  host: "localhost:9000"
+- type: unix
+  socket_type: datagram
+  path: "/run/filebeat.sock"
+parsers:
+- multiline:
+    type: pattern
+    pattern: '^<Event '
+    negate: true
+    match: after
 output.logstash:
-  # The Logstash hosts
   hosts: ["logstash.democorp.com:5044"]
 processors:
   - rename:
@@ -50,7 +55,7 @@ processors:
       field: event.original
       target_field: winlog
 ###EOF###
-filebeat -e -c /etc/filebeat/filebeat.yml -d "publish"
+filebeat -e -v
 
 ### Run these commands on the DC ###
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
@@ -67,9 +72,9 @@ nano query.xml #copy from source
 nano openwec.conf.toml #copy from source
 ./target/release/openwec -c openwec.conf.toml db init
 ./target/release/openwec -c openwec.conf.toml subscriptions new openwec_sub query.xml
-./target/release/openwec -c openwec.conf.toml subscriptions edit openwec_sub outputs add --format raw tcp 127.0.0.1 9000
+./target/release/openwec -c openwec.conf.toml subscriptions edit openwec_sub outputs add --format raw unixdatagram /run/filebeat.sock
 ./target/release/openwec -c openwec.conf.toml subscriptions enable openwec_sub
-./target/release/openwecd -c openwec.conf.toml # wait 60 seconds for connection errors to appear for 127.0.0.1:9000
+./target/release/openwecd -c openwec.conf.toml # wait 60 sec for: WARN server::outputs::unix - Failed to connect to /run/filebeat.sock: No such file or directory (os error 2) - this means filebeat is not running or listening on that socket
 ```
 
 1. docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
