@@ -46,12 +46,9 @@ processors:
       fields:
         - from: message
           to: event.original
-#      ignore_missing: true
   - decode_xml_wineventlog:
       field: event.original
       target_field: winlog
-  - add_host_metadata:
-      when.not.contains.tags: forwarded
 ###EOF###
 filebeat -e -c /etc/filebeat/filebeat.yml -d "publish"
 
