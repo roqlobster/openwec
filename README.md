@@ -6,7 +6,7 @@ Notes:
 #sudo adduser dcadmin
 #sudo usermod -a -G sudo dcadmin
 #su dcadmin
-sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
+sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential krb5-user krb5-config openssh-server #CASE SENSITIVE - DOMAIN NAME IN CAPS
 sudo nano /etc/krb5.conf
 sudo apt install realmd
 sudo hostnamectl set-hostname openwec.democorp.com
