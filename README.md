@@ -2,24 +2,6 @@
 
 Notes:
 ```
-### ON LOGSTASH SERVER ###
-### Look into containers instead:
-wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic-keyring.gpg
-sudo apt-get install apt-transport-https
-echo "deb [signed-by=/usr/share/keyrings/elastic-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
-sudo apt-get update && sudo apt-get install logstash
-echo pipeline.conf <<EOF
-input {
-  beats {
-    port => 5044
-  }
-}
-output {
-  stdout { codec => rubydebug }
-}
-EOF
-sudo /usr/share/logstash/bin/logstash -f pipeline.conf
-
 ### OPEN NEW SSH TO OPENWEC ###
 #sudo adduser dcadmin
 #sudo usermod -a -G sudo dcadmin
@@ -96,6 +78,14 @@ nano openwec.conf.toml #copy from source
   }
 ```
 1. logstash->assigned_pipelines->roles->manager->add custom0
+
+
+
+
+
+
+
+
 
 
 OpenWEC is a free and open source (GPLv3) implementation of a Windows Event Collector server running on GNU/Linux and written in Rust.
