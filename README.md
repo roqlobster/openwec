@@ -51,7 +51,7 @@ filebeat -e -v --path.config ./filebeat --path.data ./filebeat
 ### Run these commands on the DC ###
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
 # create an AD user named owec - find powershell to create this automatically
-ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL /pass strong_1337_PASSWORD /target dc.democorp.com /out owec.keytab
+ktpass /princ HTTP/openwec.democorp.com@DEMOCORP.COM /mapuser owec /crypto ALL /ptype KRB5_NT_PRINCIPAL +rndPass /target dc.democorp.com /out owec.keytab
 scp owec.keytab dcadmin@openwec.democorp.com:/home/dcadmin/openwec
 
 ### OPEN NEW SSH TO OPENWEC ###
