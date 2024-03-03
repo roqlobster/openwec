@@ -79,14 +79,10 @@ nano openwec.conf.toml #copy from source
 ```
 1. logstash->assigned_pipelines->roles->manager->add custom0
 
+ingest pipeline similar to elastic-agent tag, but for winlog
+needs to be forwarded to elastic-search pipeline for winlog-forward
 
-
-
-
-
-
-
-
+----
 
 OpenWEC is a free and open source (GPLv3) implementation of a Windows Event Collector server running on GNU/Linux and written in Rust.
 
