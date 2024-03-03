@@ -33,26 +33,36 @@ sudo pam-auth-update
 
 mkdir filebeat
 echo ./filebeat/filebeat.yml <<EOF
+logging.metrics.enabled: true
+
 filebeat.inputs:
 - type: unix
   socket_type: datagram
-  path: "/run/filebeat.sock"
+  path: "/tmp/filebeat.sock"
+
 parsers:
 - multiline:
     type: pattern
     pattern: '^<Event '
     negate: true
     match: after
+
 output.logstash:
   hosts: ["logstash.democorp.com:5044"]
+  bulk_max_size: 1024
+  flush_interval: 3
+
 processors:
   - rename:
       fields:
         - from: message
           to: event.original
+      ignore_missing: true
   - decode_xml_wineventlog:
       field: event.original
       target_field: winlog
+  - add_tags:
+      tags: [winlog]
 EOF
 filebeat -e -v --path.config ./filebeat --path.data ./filebeat
 
