@@ -8,8 +8,7 @@ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearm
 sudo apt-get install apt-transport-https
 echo "deb [signed-by=/usr/share/keyrings/elastic-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-8.x.list
 sudo apt-get update && sudo apt-get install logstash
-nano pipeline.conf
-### SOF ###
+echo pipeline.conf <<EOF
 input {
   beats {
     port => 5044
@@ -18,22 +17,22 @@ input {
 output {
   stdout { codec => rubydebug }
 }
-### EOF ###
+EOF
 sudo /usr/share/logstash/bin/logstash -f pipeline.conf
 
 ### OPEN NEW SSH TO OPENWEC ###
-sudo adduser dcadmin
-sudo usermod -a -G sudo dcadmin
-su dcadmin
-sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential && 
-sudo apt install krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
+#sudo adduser dcadmin
+#sudo usermod -a -G sudo dcadmin
+#su dcadmin
+sudo apt update && sudo apt install libclang-dev cargo pkg-config libssl-dev libkrb5-dev build-essential krb5-user krb5-config #CASE SENSITIVE - DOMAIN NAME IN CAPS
 sudo nano /etc/krb5.conf
 sudo apt install realmd
 sudo hostnamectl set-hostname openwec.democorp.com
 sudo realm join -v -U dcadmin democorp.com
 sudo pam-auth-update
-sudo nano /etc/filebeat/filebeat.yml
-###SOF###
+
+mkdir filebeat
+echo ./filebeat/filebeat.yml <<EOF
 filebeat.inputs:
 - type: unix
   socket_type: datagram
@@ -54,8 +53,8 @@ processors:
   - decode_xml_wineventlog:
       field: event.original
       target_field: winlog
-###EOF###
-filebeat -e -v
+EOF
+filebeat -e -v --path.config ./filebeat --path.data ./filebeat
 
 ### Run these commands on the DC ###
 setspn -A HTTP/openwec.democorp.com@democorp.com openwec
@@ -76,12 +75,7 @@ nano openwec.conf.toml #copy from source
 ./target/release/openwec -c openwec.conf.toml subscriptions enable openwec_sub
 ./target/release/openwecd -c openwec.conf.toml # wait 60 sec for: WARN server::outputs::unix - Failed to connect to /run/filebeat.sock: No such file or directory (os error 2) - this means filebeat is not running or listening on that socket
 ```
-
-1. docker->containers->so-logstash->port_bindings->add 0.0.0.0:10070:10070
-1. firewall->hostgroups->manager->add 10.103.0.105 (openwec)  (apply to node: manager)
-1. firewall->portgroups->customportgroup0->tcp->add 10070  (apply to node: manager)
-1. firewall->role->manager->chain->DOCKER-USER->hostgroups->manager->portgroups->customportgroup0  (apply to node: manager)
-1. firewall->role->manager->chain->INPUT->hostgroups->customhostgroup->portgroups->customportgroup0  (apply to node: manager)
+1. firewall->hostgroups->beats->add 10.103.0.105 (openwec)  (apply to node: manager)
 1. logstash->defined_pipelines->custom0
 ```
   input {
