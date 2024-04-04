@@ -30,5 +30,6 @@
         <Select Path="Microsoft-Windows-Authentication/AuthenticationPolicyFailures-DomainController">*</Select>
         <Select Path="Microsoft-Windows-Authentication/ProtectedUserFailures-DomainController">*</Select>
         <Select Path="Microsoft-Windows-NTLM/Operational">*</Select>
+        <Select Path="Terminal-Services-RemoteConnectionManager/Operational">*</Select>
     </Query>
 </QueryList>
